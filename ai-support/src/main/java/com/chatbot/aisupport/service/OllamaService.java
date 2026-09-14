@@ -6,14 +6,21 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 @Service
 public class OllamaService {
 
-    private static final String OLLAMA_URL = "http://localhost:11434/api/generate";
+    private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     public String getAIResponse(String prompt) {
+
+        String apiKey = System.getenv("GROQ_API_KEY");
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            return "⚠️ API key is missing. Please add GROQ_API_KEY to Render Environment Variables.";
+        }
 
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -26,51 +33,50 @@ public class OllamaService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
-            String optimizedPrompt = """
-You are an AI assistant.
-
-Answer the user's question directly.
-Do NOT give examples.
-Do NOT simulate conversation.
-Keep the answer simple and clear in 2-3 lines.
-
-Question:
-""" + prompt;
+            headers.setBearerAuth(apiKey);
 
             Map<String, Object> request = new HashMap<>();
-            request.put("model", "tinyllama:latest");
-            request.put("prompt", optimizedPrompt);
-            request.put("stream", false);
-            request.put("temperature", 0.5);
+            request.put("model", "llama3-8b-8192");
+            
+            List<Map<String, String>> messages = new ArrayList<>();
+            Map<String, String> systemMsg = new HashMap<>();
+            systemMsg.put("role", "system");
+            systemMsg.put("content", "You are an AI customer service assistant. Answer simply and directly in 2-3 lines.");
+            messages.add(systemMsg);
+            
+            Map<String, String> userMsg = new HashMap<>();
+            userMsg.put("role", "user");
+            userMsg.put("content", prompt);
+            messages.add(userMsg);
 
-            HttpEntity<Map<String, Object>> entity =
-                    new HttpEntity<>(request, headers);
+            request.put("messages", messages);
 
-            // ✅ FIXED HERE
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+
             ResponseEntity<Map<String, Object>> response =
                     restTemplate.exchange(
-                            OLLAMA_URL,
+                            GROQ_URL,
                             HttpMethod.POST,
                             entity,
                             new org.springframework.core.ParameterizedTypeReference<>() {}
                     );
 
-            if (response.getBody() != null &&
-                    response.getBody().get("response") != null) {
-
-                return response.getBody()
-                        .get("response")
-                        .toString()
-                        .trim();
+            if (response.getBody() != null && response.getBody().containsKey("choices")) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+                if (!choices.isEmpty()) {
+                    Map<String, Object> messageObj = (Map<String, Object>) choices.get(0).get("message");
+                    if (messageObj != null && messageObj.containsKey("content")) {
+                        return messageObj.get("content").toString().trim();
+                    }
+                }
             }
 
             return "AI returned empty response.";
 
         } catch (ResourceAccessException e) {
-            return "⚠️ Cannot connect to Ollama server.";
+            return "⚠️ Cannot connect to Groq server.";
         } catch (Exception e) {
-            return "⚠️ AI server error.";
+            return "⚠️ AI server error: " + e.getMessage();
         }
     }
 }
