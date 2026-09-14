@@ -3,6 +3,8 @@
   <h1>🚀 AI Support Assistant (Hybrid Chatbot System)</h1>
   <p><b>A production-ready AI chatbot combining structured knowledge (FAQ) with generative AI for reliable, scalable customer support.</b></p>
   
+  <h3>🌐 <a href="https://ai-support-assistant-xm4t.onrender.com">Live Demo</a></h3>
+
   <p>
     <img src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java" />
     <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot" />
@@ -127,7 +129,7 @@ http://localhost:8080/index.html
 ## 📈 Future Roadmap
 
 - [ ] **Semantic Search Integration**: Upgrading FAQ matching to use vector embeddings.
-- [ ] **Cloud Deployment Ready**: Dockerizing the application for 1-click Render/Railway deployment.
+- [x] **Cloud Deployment Ready**: Dockerized and deployed on Render.
 - [ ] **Voice Assistant**: Web Speech API integration for accessibility.
 - [ ] **Admin Dashboard**: Analytics portal to track AI accuracy and user satisfaction.
 
