@@ -367,6 +367,17 @@ async function typeMessage(text){
 const chat=document.getElementById("chat");
 const msg=document.createElement("div");
 msg.className="msg bot";
+
+const textDiv=document.createElement("div");
+textDiv.className="text";
+msg.appendChild(textDiv);
+
+const time=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+const timeDiv=document.createElement("div");
+timeDiv.className="timestamp";
+timeDiv.innerText=time;
+msg.appendChild(timeDiv);
+
 chat.appendChild(msg);
 chat.scrollTo({
     top: chat.scrollHeight,
@@ -375,7 +386,7 @@ chat.scrollTo({
 
 let words=text.split(" ");
 for(let i=0;i<words.length;i++){
-msg.innerText+=words[i]+" ";
+textDiv.innerText+=words[i]+" ";
 await new Promise(r=>setTimeout(r,30));
 chat.scrollTo({
     top: chat.scrollHeight,
@@ -408,7 +419,7 @@ input.value="";
 
 const typing=document.createElement("div");
 typing.className="msg bot";
-typing.innerHTML="🤖 AI is typing<span class='dots'></span>";
+typing.innerHTML="<div class='text'>🤖 AI is typing<span class='dots'></span></div>";
 typing.id="typing";
 document.getElementById("chat").appendChild(typing);
 
