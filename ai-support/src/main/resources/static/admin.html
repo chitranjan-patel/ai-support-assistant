@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+<style>
+body {font-family:Arial; padding:30px;}
+input, textarea {width:100%; padding:8px; margin:5px 0;}
+button {padding:8px 15px; margin:5px 0;}
+.faq {border:1px solid #ccc; padding:10px; margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<h2>Admin - Manage FAQs</h2>
+
+<h3>Add FAQ</h3>
+<input id="question" placeholder="Enter question">
+<textarea id="answer" placeholder="Enter answer"></textarea>
+<button onclick="addFaq()">Add FAQ</button>
+
+<hr>
+
+<h3>All FAQs</h3>
+<div id="faqList"></div>
+
+<script>
+
+async function loadFaqs(){
+const res = await fetch("/api/admin/faqs");
+const data = await res.json();
+
+const box = document.getElementById("faqList");
+box.innerHTML="";
+
+data.forEach(f=>{
+box.innerHTML += `
+<div class="faq">
+<b>${f.question}</b><br>
+${f.answer}<br>
+<button onclick="deleteFaq(${f.id})">Delete</button>
+</div>
+`;
+});
+}
+
+async function addFaq(){
+const q=document.getElementById("question").value;
+const a=document.getElementById("answer").value;
+
+await fetch("/api/admin/faqs",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({question:q,answer:a})
+});
+
+loadFaqs();
+}
+
+async function deleteFaq(id){
+await fetch("/api/admin/faqs/"+id,{method:"DELETE"});
+loadFaqs();
+}
+
+loadFaqs();
+
+</script>
+
+</body>
+</html>

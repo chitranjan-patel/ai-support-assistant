@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Analytics Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin:0;
+    padding:40px;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+}
+
+/* TITLE */
+h1 {
+    margin-bottom:40px;
+    font-weight:600;
+}
+
+/* GRID */
+.grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap:25px;
+}
+
+/* CARD */
+.card {
+    background:#1e293b;
+    padding:25px;
+    border-radius:16px;
+    transition:0.3s;
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+}
+
+.card h3 {
+    margin:0;
+    font-size:16px;
+    opacity:0.8;
+}
+
+.card .number {
+    font-size:32px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+/* CHART */
+.chart-box {
+    margin-top:60px;
+    background:#1e293b;
+    padding:30px;
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.chart-box canvas {
+    max-width:600px;
+    max-height:400px;
+}
+
+canvas {
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📊 Chatbot Analytics Dashboard</h1>
+
+<div class="grid">
+    <div class="card">
+        <h3>Total Messages</h3>
+        <div class="number" id="messages">0</div>
+    </div>
+
+    <div class="card">
+        <h3>Total Users</h3>
+        <div class="number" id="users">0</div>
+    </div>
+
+    <div class="card">
+        <h3>Total Sessions</h3>
+        <div class="number" id="sessions">0</div>
+    </div>
+
+    <div class="card">
+        <h3>Total FAQs</h3>
+        <div class="number" id="faqs">0</div>
+    </div>
+</div>
+
+<div class="chart-box">
+    <h3>System Overview</h3>
+    <canvas id="analyticsChart"></canvas>
+
+    <h3 style="margin-top:60px;">FAQ vs AI Usage</h3>
+    <canvas id="usagePieChart"></canvas>
+</div>
+
+<script>
+
+async function loadAnalytics(){
+    const res = await fetch("/api/analytics");
+    const data = await res.json();
+
+    document.getElementById("messages").innerText = data.totalMessages;
+    document.getElementById("users").innerText = data.totalUsers;
+    document.getElementById("sessions").innerText = data.totalSessions;
+    document.getElementById("faqs").innerText = data.totalFaqs;
+
+    createBarChart(data);
+    createPieChart(data);
+}
+
+/* 📊 BAR CHART */
+function createBarChart(data){
+    new Chart(document.getElementById("analyticsChart"), {
+        type: 'bar',
+        data: {
+            labels: ['Messages','Users','Sessions','FAQs'],
+            datasets: [{
+                label: 'System Data',
+                data: [
+                    data.totalMessages,
+                    data.totalUsers,
+                    data.totalSessions,
+                    data.totalFaqs
+                ],
+                backgroundColor: [
+                    '#3b82f6',
+                    '#22c55e',
+                    '#f59e0b',
+                    '#ef4444'
+                ]
+            }]
+        },
+        options: {
+            responsive:true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: 'white' }
+                }
+            },
+            scales: {
+                x: { ticks: { color: 'white' }},
+                y: { ticks: { color: 'white' }}
+            }
+        }
+    });
+}
+
+/* 🥧 PIE CHART */
+function createPieChart(data){
+    new Chart(document.getElementById("usagePieChart"), {
+        type: 'pie',
+        data: {
+            labels: ['FAQ Responses', 'AI Responses'],
+            datasets: [{
+                data: [
+                    data.faqCount || 0,
+                    data.aiCount || 0
+                ],
+                backgroundColor: [
+                    '#22c55e',
+                    '#3b82f6'
+                ]
+            }]
+        },
+        options: {
+            responsive:true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: 'white' }
+                }
+            }
+        }
+    });
+}
+
+loadAnalytics();
+
+</script>
+
+</body>
+</html>
