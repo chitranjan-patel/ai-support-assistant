@@ -36,7 +36,7 @@ public class OllamaService {
             headers.setBearerAuth(apiKey);
 
             Map<String, Object> request = new HashMap<>();
-            request.put("model", "llama-3.1-8b-instant");
+            request.put("model", "llama-3.3-70b-versatile");
             
             List<Map<String, String>> messages = new ArrayList<>();
             Map<String, String> systemMsg = new HashMap<>();
